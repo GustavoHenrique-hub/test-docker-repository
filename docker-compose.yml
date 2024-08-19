@@ -3,8 +3,8 @@ services:
   db:
     image: postgres:13
     environment:
-      POSTGRES_DB: products
-      POSTGRES_USER: postgres
+      POSTGRES_DB: prod
+      POSTGRES_USER: prod
       POSTGRES_PASSWORD: root
     ports:
       - "5432:5432"
@@ -16,7 +16,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/products
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/prod
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: root
     depends_on:
