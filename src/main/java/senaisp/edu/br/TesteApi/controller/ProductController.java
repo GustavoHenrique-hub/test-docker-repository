@@ -30,7 +30,7 @@ public class ProductController {
 	
 	@GetMapping("/findAll")
 	public ResponseEntity<List<Product>> listAll(){
-		return ResponseEntity.ok(repository.findAll());
+		return ResponseEntity.ok(repository.findAllProductsOrderedById());
 	}
 	
 	@GetMapping("/findById/{id}")
@@ -39,26 +39,46 @@ public class ProductController {
 	}
 	
 	@PostMapping("/insert")
-	public @Validated ResponseEntity<Product> insertNewValue(@RequestBody Product prod){
-		return ResponseEntity.ok(repository.save(prod));
-	}
-	
-	@PutMapping("/alter/{id}")
-	public ResponseEntity<Product> alterValue(@RequestBody Product prod, @PathVariable long id){
-		Optional<Product> prodData = repository.findById(id);
+	public @Validated ResponseEntity<Map<String, String>> insertNewValue(@RequestBody Product prod){
+		Map<String, String> response = new HashMap<>();
 		
-		if (prodData.isPresent()) {
-			Product product = prodData.get();
-			product.setName(prod.getName());
-			product.setQuantity(prod.getQuantity());
-			product.setValue(prod.getValue());
+		try {
+			repository.save(prod);
+			response.put("message", "Inserido com sucesso!!");
+			return ResponseEntity.ok(response);
 			
-			return new ResponseEntity<>(repository.save(product), HttpStatus.OK);
-			
-		}else {
-			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		catch (Exception e){
+			response.put("error", "Produto não inserido!!");
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
 		}
 	}
+	
+	@PutMapping("/update/{id}")
+	public ResponseEntity<Map<String, String>> alterValue(@RequestBody Product prod, @PathVariable long id){
+		Map<String, String> response = new HashMap<>();
+		Optional<Product> prodData = repository.findById(id);
+		
+		try {
+			if (prodData.isPresent()) {
+				Product product = prodData.get();
+				product.setName(prod.getName());
+				product.setQuantity(prod.getQuantity());
+				product.setPrice(prod.getPrice());
+				new ResponseEntity<>(repository.save(product), HttpStatus.OK);
+				
+				//MENSAGEM DE RESPOSTA DA API QUANDO DER CÓDIGO 200
+				response.put("message", "Alterado com sucesso!!");
+			}
+			return ResponseEntity.ok(response);
+			
+		}catch(Exception e) {
+			//MENSAGEM DE RESPOSTA DA API QUANDO DER QUALQUER OUTRO CÓDIGO 
+			response.put("error", e.getMessage());
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+		}
+	}
+		
 	
 	@DeleteMapping("/delete/{id}")
 	public ResponseEntity<Map<String, String>> deleteById(@PathVariable long id){
